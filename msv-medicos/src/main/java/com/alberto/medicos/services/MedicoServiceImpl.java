@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alberto.common.clients.CitaClient;
 import com.alberto.common.dto.MedicosRequest;
 import com.alberto.common.dto.MedicosResponse;
 import com.alberto.common.enums.DisponibilidadMedico;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MedicoServiceImpl  implements MedicoService{
 	private final MedicoRepository medicoRepository;
 	private final MedicoMapper medicoMapper;
+	private final CitaClient citaClient;
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -69,6 +71,9 @@ public class MedicoServiceImpl  implements MedicoService{
 		// TODO Auto-generated method stub
 		log.info("Actualizando medico {}",request);
 		Medicos medicos = obtenerMedicoActivoPorIdOException(id);
+		
+		medicoTieneCitasAsignadas(id);
+		
 		validarCambiosUnicos(request, id);
 		
 		medicos.actualizar(request.nombre(), request.apellidoPaterno(), request.apellidoMaterno(), request.edad(), request.email(), request.telefono(), request.cedulaProfesional(),
@@ -97,6 +102,7 @@ public class MedicoServiceImpl  implements MedicoService{
 		// TODO Auto-generated method stub
 		log.info("Eliminando medico {}",id);
 		Medicos medicos = obtenerMedicoActivoPorIdOException(id);
+		medicoTieneCitasAsignadas(id);
 		medicos.eliminar();
 		
 		log.info("Medico eliminado");
@@ -140,6 +146,11 @@ public class MedicoServiceImpl  implements MedicoService{
 		if(medicoRepository.existsByCedulaProfesionalAllIgnoreCaseAndEstadoRegistroAndIdMedicoNot(request.cedulaProfesional().trim(),EstadoRegistro.ACTIVO,id))
 			throw new IllegalArgumentException("Ya existe un medico activo con el email: "+request.cedulaProfesional());
 		
+	}
+	
+	
+	private void medicoTieneCitasAsignadas(Long idMedico) {
+		citaClient.medicoTieneCitasAsignadas(idMedico);
 	}
 	
 	

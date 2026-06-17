@@ -4,14 +4,11 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.alberto.common.dto.PacienteResponse;
 
-@FeignClient("msv-pacientes")
-public interface PacienteClient {
-	@GetMapping("/{id}")
-	PacienteResponse obtenerPacienteActivoPorId(@PathVariable Long id);
-	
-	
+@FeignClient("msv-citas")
+public interface CitaClient {
+	@GetMapping("/id-medico/{idMedico}/citas-asignadas")
+	void medicoTieneCitasAsignadas(@PathVariable Long idMedico);
 	
 	
 

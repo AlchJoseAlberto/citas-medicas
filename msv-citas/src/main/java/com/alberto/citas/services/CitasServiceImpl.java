@@ -67,6 +67,7 @@ public class CitasServiceImpl implements CitasService{
 		Citas cita = citasMapper.requestEntidad(request);
 		
 		citasRepository.save(cita);
+		cambiarDisponibilidadMedicoSegunEstadoCita(cita.getIdMedico(), cita.getEstadoCita());
 		
 		return citasMapper.entidadResponse(cita, paciente, obtenerMedicoSiEstado(cita.getIdMedico()));
 		
@@ -105,6 +106,53 @@ public class CitasServiceImpl implements CitasService{
 		
 	}
 	
+	@Override
+	public void actualizarEstadoCita(Long idCita, Long idEstadoCita) {
+		// TODO Auto-generated method stub
+		Citas cita = obtenerCitaActivaOException(idCita);
+		log.info("Actualizando la cita {}",cita.getId());
+		cita.actualizarEstadoCita(EstadosCitas.obtenerEstadoCitasPorCodigo(idEstadoCita));
+		
+		cambiarDisponibilidadMedicoSegunEstadoCita(cita.getIdMedico(), cita.getEstadoCita());
+		
+		log.info("Estado de la cita {} actualizado correctamente",cita.getId());
+		
+	}
+
+	@Override
+	public void medicoTieneCitasAsignadas(Long idMedico) {
+		// TODO Auto-generated method stub
+		log.info("Validando si el medico tiene una cita activa con los estados: {}",ESTADOS_INVALIDOS_REGISTROS_ASIGNADOS);
+		boolean tieneCitas = citasRepository.existsByIdMedicoAndEstadoRegistroAndEstadoCitaIn(idMedico,EstadoRegistro.ACTIVO, ESTADOS_INVALIDOS_REGISTROS_ASIGNADOS);
+		
+		if(tieneCitas)
+			throw new EntidadRelacionadaException("No se puede modificar el medico ya que tiene citas con estados "+ ESTADOS_INVALIDOS_REGISTROS_ASIGNADOS);
+		
+		
+	}
+	
+	private void cambiarDisponibilidadMedico(Long idMedico, Long idDisponibilidad) {
+		log.info("Actualizando disponibilidad del medico con id {} a {}",idMedico, DisponibilidadMedico.obtenerDisponibilidadPorCodigo(idDisponibilidad));
+	
+		medicoClient.actualizarDisponibilidadMedico(idMedico, idDisponibilidad);
+		
+	}
+	
+	private void cambiarDisponibilidadMedicoSegunEstadoCita(Long idMedico, EstadosCitas estadosCita) {
+		switch(estadosCita) {
+		case PENDIENTE, CONFIRMADA -> 
+		cambiarDisponibilidadMedico(idMedico, DisponibilidadMedico.NO_DISPONIBLE.getCodigo());
+		
+		case EN_CURSO -> 
+		cambiarDisponibilidadMedico(idMedico, DisponibilidadMedico.EN_CONSULTA.getCodigo());
+		
+		case FINALIZADA, CANCELADA -> 
+		cambiarDisponibilidadMedico(idMedico, DisponibilidadMedico.DISPONIBLE.getCodigo());
+		}
+		
+		
+	}
+	
 	private Citas obtenerCitaActivaOException(Long id) {
 		return citasRepository.findByIdAndEstadoRegistro(id,EstadoRegistro.ACTIVO).orElseThrow(()->new RecursoNoEncontradoException("Cita activa no encontrada con id "+id));
 	}
@@ -139,6 +187,8 @@ public class CitasServiceImpl implements CitasService{
 	private PacienteResponse obtenerPacienteActivoPorId(Long id) {
 		return pacienteClient.obtenerPacienteActivoPorId(id);
 	}
+
+
 	
 	
 	
