@@ -129,8 +129,8 @@ private void validarDatos(String nombre, String apellidoPaterno, String apellido
 	StringCustomUtils.validarTamanio(direccion, 1, 150, "El direccion es requerido y debe tener de 1 y 150 caracteres");
 	
 	ValoresNumericosUtils.validarRangoShort(edad, (short) 1, (short) 100, "La edad debe ser de 1 a 100 años");
-	ValoresNumericosUtils.validarRangoDouble(peso, 1.0, 200.0, "El peso debe ser de 1 a 200kilos");
-	ValoresNumericosUtils.validarRangoDouble(estatura, 1.0, 200.0, "La estatura debe ser de 1 a 200cm");
+	ValoresNumericosUtils.validarRangoDouble(peso, 1.0, 200.0, "El peso debe ser de 1.0 a 200.0 kilos");
+	ValoresNumericosUtils.validarRangoDouble(estatura, 1.0, 2.0, "La estatura debe ser de 1.0 m a 2.0 m");
 	
 }
 

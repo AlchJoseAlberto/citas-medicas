@@ -60,7 +60,7 @@ public class CitasMapper implements CommonMapper<CitasRequest, CitasResponse, Ci
 		
 		String edad = response.edad()+" años.";
 		String peso = response.peso()+" kg.";
-		String estatura = response.peso()+" m.";
+		String estatura = response.estatura()+" m.";
 		
 		return new DatosPaciente(response.nombre(), response.numExpediente(), edad, peso, estatura,
 				response.imc().toString(), response.telefono());

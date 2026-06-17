@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+import com.alberto.common.clients.CitaClient;
 import com.alberto.common.dto.PacienteRequest;
 import com.alberto.common.dto.PacienteResponse;
 import com.alberto.common.enums.EstadoRegistro;
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PacienteServiceImpl implements PacienteService {
 	private final PacienteRepository pacienteRepository;
 	private final PacienteMapper pacienteMapper;
-	
+	private final CitaClient citaClient;
 	
 	
 	@Override
@@ -37,14 +37,15 @@ public class PacienteServiceImpl implements PacienteService {
 	@Override
 	public PacienteResponse obtenerPorId(Long id) {
 		
-		return pacienteMapper.entidadResponse(obtenerPacientePorIdOException(id));
+		return pacienteMapper.entidadResponse(obtenerPacienteActivoPorIdOException(id));
 	}
 	
-		public PacienteResponse obtenerPacienteSinEstadoPorId(Long id) {
-				
-				return pacienteMapper.entidadResponse(pacienteRepository.findById(id).orElseThrow(
-						()-> new RecursoNoEncontradoException("No se encontro el paciente")));
-			}
+	@Override
+	public PacienteResponse obtenerPacienteSinEstadoPorId(Long id) {
+			
+			return pacienteMapper.entidadResponse(pacienteRepository.findById(id).orElseThrow(
+					()-> new RecursoNoEncontradoException("No se encontro el paciente")));
+		}
 
 	@Override
 	public PacienteResponse registrar(PacienteRequest request) {
@@ -70,7 +71,9 @@ public class PacienteServiceImpl implements PacienteService {
 	@Override
 	public PacienteResponse actualizar(PacienteRequest request, Long id) {
 		// TODO Auto-generated method stub
-		Paciente paciente = obtenerPacientePorIdOException(id);
+		Paciente paciente = obtenerPacienteActivoPorIdOException(id);
+	
+		pacienteTieneCitasAsignadas(id);
 		
 		if(pacienteRepository.existsByEmailIgnoreCaseAndIdNotAndEstadoRegistro(request.email().trim(), id, EstadoRegistro.ACTIVO))
 			throw new IllegalArgumentException("Ya existe un paciente con el email");
@@ -79,8 +82,7 @@ public class PacienteServiceImpl implements PacienteService {
 			throw new IllegalArgumentException("Ya existe un paciente con el telefono");
 		
 		paciente.actualizar(request.nombre(), request.apellidoPaterno(), request.apellidoMaterno(),
-				request.edad(), request.peso(), request.estatura(), request.email(), request.telefono(), request.direccion())
-		;
+				request.edad(), request.peso(), request.estatura(), request.email(), request.telefono(), request.direccion());
 		
 		return pacienteMapper.entidadResponse(paciente);
 	}
@@ -88,13 +90,19 @@ public class PacienteServiceImpl implements PacienteService {
 	@Override
 	public void eliminar(Long id) {
 		// TODO Auto-generated method stub
-		Paciente paciente = obtenerPacientePorIdOException(id);
+		Paciente paciente = obtenerPacienteActivoPorIdOException(id);
+		pacienteTieneCitasAsignadas(id);
 		paciente.eliminar();
 	}
 	
-	private Paciente obtenerPacientePorIdOException(Long id) {
+	private Paciente obtenerPacienteActivoPorIdOException(Long id) {
 		return pacienteRepository.findByIdAndEstadoRegistro(id, EstadoRegistro.ACTIVO).orElseThrow(()-> new RecursoNoEncontradoException(
 				"No se encontro el paciente con id "+id));
+	}
+	
+	
+	private void pacienteTieneCitasAsignadas(Long idPaciente) {
+		citaClient.pacienteTieneCitasAsignadas(idPaciente);
 	}
 
 }

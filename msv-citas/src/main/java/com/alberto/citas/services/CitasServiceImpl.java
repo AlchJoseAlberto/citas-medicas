@@ -41,14 +41,14 @@ public class CitasServiceImpl implements CitasService{
 		// TODO Auto-generated method stub
 		
 		return citasRepository.findByEstadoRegistro(EstadoRegistro.ACTIVO).stream().map(
-				entidad-> citasMapper.entidadResponse(entidad, obtenerPacienteActivoPorId(entidad.getIdPaciente()), obtenerMedicoSiEstado(entidad.getIdMedico()))).toList();
+				entidad-> citasMapper.entidadResponse(entidad, obtenerPacienteSinEstadoPorId(entidad.getIdPaciente()), obtenerMedicoSiEstado(entidad.getIdMedico()))).toList();
 	}
 
 	@Override
 	public CitasResponse obtenerPorId(Long id) {
 		// TODO Auto-generated method stub
 		Citas cita = obtenerCitaActivaOException(id);
-		return citasMapper.entidadResponse(cita, obtenerPacienteActivoPorId(cita.getIdPaciente()), obtenerMedicoSiEstado(cita.getIdMedico()));
+		return citasMapper.entidadResponse(cita, obtenerPacienteSinEstadoPorId(cita.getIdPaciente()), obtenerMedicoSiEstado(cita.getIdMedico()));
 	}
 
 	@Override
@@ -58,10 +58,7 @@ public class CitasServiceImpl implements CitasService{
 		MedicosResponse medico = obtenerMedicoActivo(request.idMedico());
 		validarDisponibilidadMedico(medico.idDisponibilidad());
 		
-		//paciente response
 		PacienteResponse paciente = obtenerPacienteActivoPorId(request.idPaciente());
-		
-
 		validadPacienteTieneRegistrosAsignados(request.idPaciente());
 		
 		Citas cita = citasMapper.requestEntidad(request);
@@ -78,12 +75,16 @@ public class CitasServiceImpl implements CitasService{
 		Citas cita = obtenerCitaActivaOException(id);
 		log.info("Eliminando la cita con id {}",id);
 		
-		MedicosResponse medico= obtenerMedicoActivo(request.idMedico());
-		
+		PacienteResponse paciente = obtenerPacienteActivoPorId(request.idPaciente());
 		if(!cita.getIdPaciente().equals(request.idPaciente()))
 			validadPacienteTieneRegistrosAsignados(request.idPaciente());
 		
-		validarDisponibilidadMedico(medico.idDisponibilidad());
+		MedicosResponse medico= obtenerMedicoActivo(request.idMedico());
+		
+		if(!cita.getIdMedico().equals(request.idMedico())) {
+			validarDisponibilidadMedico(medico.idDisponibilidad());
+			cambiarDisponibilidadMedicoSegunEstadoCita(cita.getIdMedico(), EstadosCitas.CANCELADA);
+		}
 		
 		cita.actualizar(
 				request.idPaciente(),
@@ -91,7 +92,9 @@ public class CitasServiceImpl implements CitasService{
 				request.fechaCita(),
 				request.sintomas());
 		
-		return citasMapper.entidadResponse(cita, null, medico);
+		cambiarDisponibilidadMedicoSegunEstadoCita(cita.getIdMedico(), cita.getEstadoCita());
+		
+		return citasMapper.entidadResponse(cita, paciente, medico);
 		
 	}
 
@@ -101,6 +104,8 @@ public class CitasServiceImpl implements CitasService{
 		Citas cita = obtenerCitaActivaOException(id);
 		log.info("Eliminando la cita con id {}",id);
 		cita.eliminar();
+		
+		cambiarDisponibilidadMedicoSegunEstadoCita(cita.getIdMedico(), cita.getEstadoCita());
 		
 		log.info("Se elimino la cita");
 		
@@ -131,6 +136,18 @@ public class CitasServiceImpl implements CitasService{
 		
 	}
 	
+	
+	@Override
+	public void pacienteTieneCitasAsignadas(Long idPaciente) {
+		// TODO Auto-generated method stub
+		log.info("Validando si el paciente tiene una cita activa con los estados: {}",ESTADOS_INVALIDOS_REGISTROS_ASIGNADOS);
+		boolean tieneCitas = citasRepository.existsByIdPacienteAndEstadoRegistroAndEstadoCitaIn(idPaciente,EstadoRegistro.ACTIVO, ESTADOS_INVALIDOS_REGISTROS_ASIGNADOS);
+		
+		if(tieneCitas)
+			throw new EntidadRelacionadaException("No se puede modificar el paciente ya que tiene citas con estados "+ ESTADOS_INVALIDOS_REGISTROS_ASIGNADOS);
+		
+		
+	}
 	private void cambiarDisponibilidadMedico(Long idMedico, Long idDisponibilidad) {
 		log.info("Actualizando disponibilidad del medico con id {} a {}",idMedico, DisponibilidadMedico.obtenerDisponibilidadPorCodigo(idDisponibilidad));
 	
@@ -185,9 +202,14 @@ public class CitasServiceImpl implements CitasService{
 	}
 	
 	private PacienteResponse obtenerPacienteActivoPorId(Long id) {
+		log.info("obteniendo medico activo por id");
 		return pacienteClient.obtenerPacienteActivoPorId(id);
 	}
-
+	
+	private PacienteResponse obtenerPacienteSinEstadoPorId(Long idPaciente) {
+		log.info("obteniendo medico sin estado por id");
+		return pacienteClient.obtenerPacienteSinEstadoPorId(idPaciente);
+	}
 
 	
 	

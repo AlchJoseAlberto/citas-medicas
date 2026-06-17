@@ -6,5 +6,5 @@ import com.alberto.common.services.CrudService;
 
 
 public interface PacienteService extends CrudService<PacienteRequest, PacienteResponse> {
-
+	public PacienteResponse obtenerPacienteSinEstadoPorId(Long id);
 }

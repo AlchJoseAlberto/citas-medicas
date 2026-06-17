@@ -19,7 +19,7 @@ public record CitasRequest(
 		Long idMedico,
 		@NotNull(message = "la fecha de la cita es requerida")
 		@FutureOrPresent(message = "La fecha debe ser futura")
-		@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyy HH:mm")
+		@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
 		LocalDateTime fechaCita,
 		
 		@NotBlank(message = "Los sintomas son requeridos")

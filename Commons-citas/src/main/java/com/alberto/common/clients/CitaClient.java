@@ -10,6 +10,9 @@ public interface CitaClient {
 	@GetMapping("/id-medico/{idMedico}/citas-asignadas")
 	void medicoTieneCitasAsignadas(@PathVariable Long idMedico);
 	
+	@GetMapping("/id-paciente/{idPaciente}/citas-asigandas")
+	void pacienteTieneCitasAsignadas(@PathVariable Long idPaciente);
+	
 	
 
 }

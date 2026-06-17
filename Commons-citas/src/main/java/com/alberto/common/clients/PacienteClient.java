@@ -8,6 +8,9 @@ import com.alberto.common.dto.PacienteResponse;
 
 @FeignClient("msv-pacientes")
 public interface PacienteClient {
+	@GetMapping("/id-paciente/{id}")
+	PacienteResponse obtenerPacienteSinEstadoPorId(@PathVariable Long id);
+	
 	@GetMapping("/{id}")
 	PacienteResponse obtenerPacienteActivoPorId(@PathVariable Long id);
 	

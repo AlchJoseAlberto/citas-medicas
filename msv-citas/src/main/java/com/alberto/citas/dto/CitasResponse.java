@@ -10,7 +10,7 @@ public record CitasResponse(
 		Long id,
 		DatosPaciente datospaciente,
 		DatosMedico datosmedicos,
-		@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyy HH:mm")
+		@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
 		LocalDateTime fechaCita,
 		String sintomas,
 		String estadoCita) {

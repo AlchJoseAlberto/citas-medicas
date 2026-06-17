@@ -90,6 +90,11 @@ public class MedicoServiceImpl  implements MedicoService{
 		Medicos medicos = obtenerMedicoActivoPorIdOException(idMedico);
 		DisponibilidadMedico nuevaDisponibilidadMedico = DisponibilidadMedico.obtenerDisponibilidadPorCodigo(idDisponibilidad);
 		DisponibilidadMedico anteriorDisponibilidadMedico = medicos.getDisponibilidad();
+		
+		if(nuevaDisponibilidadMedico == DisponibilidadMedico.DISPONIBLE)
+			medicoTieneCitasAsignadas(idMedico);
+		
+		
 		medicos.actualizarDisponibilidad(nuevaDisponibilidadMedico);
 		
 		log.info("Disponibidad del medico con id {} cambio de {} a {}",idMedico,anteriorDisponibilidadMedico,nuevaDisponibilidadMedico);
@@ -124,11 +129,11 @@ public class MedicoServiceImpl  implements MedicoService{
 		
 		log.info("Validando telefono unico..");
 		if(medicoRepository.existsByTelefonoAndEstadoRegistro(request.telefono().trim(),EstadoRegistro.ACTIVO))
-			throw new IllegalArgumentException("Ya existe un medico activo con el email: "+request.telefono());
+			throw new IllegalArgumentException("Ya existe un medico activo con el telefono: "+request.telefono());
 		
 		log.info("Validando cedula procesional unica..");
 		if(medicoRepository.existsByCedulaProfesionalAllIgnoreCaseAndEstadoRegistro(request.cedulaProfesional().trim(),EstadoRegistro.ACTIVO))
-			throw new IllegalArgumentException("Ya existe un medico activo con el email: "+request.cedulaProfesional());
+			throw new IllegalArgumentException("Ya existe un medico activo con la cedula profesional: "+request.cedulaProfesional());
 		
 	}
 	
