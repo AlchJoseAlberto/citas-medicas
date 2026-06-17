@@ -6,7 +6,7 @@ import com.alberto.servicioa.client.MensajeClient;
 
 @RestController
 @RequestMapping("/saludo")
-public class SaludoController {
+public class 	SaludoController {
 private final MensajeClient mensajeClient;
 
 public SaludoController(MensajeClient mensajeClient) {

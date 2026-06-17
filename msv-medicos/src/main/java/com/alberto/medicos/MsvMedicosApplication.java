@@ -1,9 +1,9 @@
-package com.alberto.medicos;
+	package com.alberto.medicos;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.alberto.medicos","com.alberto.common"})
 public class MsvMedicosApplication {
 
 	public static void main(String[] args) {
