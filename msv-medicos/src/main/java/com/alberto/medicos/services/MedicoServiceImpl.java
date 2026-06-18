@@ -91,8 +91,8 @@ public class MedicoServiceImpl  implements MedicoService{
 		DisponibilidadMedico nuevaDisponibilidadMedico = DisponibilidadMedico.obtenerDisponibilidadPorCodigo(idDisponibilidad);
 		DisponibilidadMedico anteriorDisponibilidadMedico = medicos.getDisponibilidad();
 		
-		if(nuevaDisponibilidadMedico == DisponibilidadMedico.DISPONIBLE)
-			medicoTieneCitasAsignadas(idMedico);
+		//if(nuevaDisponibilidadMedico == DisponibilidadMedico.DISPONIBLE)
+			//medicoTieneCitasAsignadas(idMedico);
 		
 		
 		medicos.actualizarDisponibilidad(nuevaDisponibilidadMedico);
